@@ -25,9 +25,7 @@ let call s =
 
 type ('s, 't, 'x) general = ('s, 't, 'x) t
 
-module GeneralK(M : sig type s type t end)
-  : Kleisli.KLEISLI with type 'x t = (M.s, M.t, 'x) t =
-struct
+module GeneralK(M : sig type s type t end) = struct
   type 'x t = (M.s, M.t, 'x) general
   let return = (!!)
   let bind = (>>=)

@@ -3,7 +3,7 @@ type 'a t =
   | None
 
 type 'a option = 'a t
-module OptionK : Kleisli.KLEISLI with type 'a t = 'a t = struct
+module OptionK = struct
   type 'a t = 'a option
 
   let return x =
