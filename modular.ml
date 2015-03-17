@@ -162,12 +162,10 @@ type 'a judgement =
   | Chk of 'a * 'a
 
 module type KERNEL = sig
-  module Op : sig
-    type t = ..
-  end
+  type t = ..
 end
 
-module type UNIT = sig
+module type THEORY = sig
   module Op : OPERATOR
   exception Call
 
@@ -176,15 +174,15 @@ module type UNIT = sig
   end
 end
 
-module One (M : KERNEL) = struct
+module Unit (M : KERNEL) = struct
   exception Call
 
-  type M.Op.t +=
+  type M.t +=
     | UNIT
     | AX
 
   module Op = struct
-    type t = M.Op.t
+    type t = M.t
     let to_string o =
       match o with
       | UNIT -> "unit"
@@ -213,12 +211,12 @@ end
 module Pi (M : KERNEL) = struct
   exception Call
 
-  type M.Op.t +=
+  type M.t +=
     | LAM
     | PI
 
   module Op = struct
-    type t = M.Op.t
+    type t = M.t
    
     let to_string o =
       match o with
@@ -249,8 +247,8 @@ module Sg (M : KERNEL) = struct
   exception Call
 
   module Op = struct
-    type t = M.Op.t
-    type M.Op.t += PAIR
+    type t = M.t
+    type M.t += PAIR
    
     let to_string o =
       match o with
@@ -270,7 +268,7 @@ module Sg (M : KERNEL) = struct
   end
 end
 
-module Comp (M1 : UNIT) (M2 : UNIT with type Op.t = M1.Op.t) = struct
+module Comp (M1 : THEORY) (M2 : THEORY with type Op.t = M1.Op.t) = struct
   exception Call
 
   module Op : OPERATOR with type t = M1.Op.t = struct
@@ -304,20 +302,18 @@ module Comp (M1 : UNIT) (M2 : UNIT with type Op.t = M1.Op.t) = struct
 end
 
 module Kernel = struct
-  module Op = struct
-    type t = ..
-  end
+  type t = ..
 end
 
 module Pi' = Pi (Kernel)
 module Sg' = Sg (Kernel)
-module One' = One (Kernel)
+module Unit' = Unit (Kernel)
 
-module Lang = Comp (Comp (Pi') (Sg')) (One')
+module Lang = Comp (Comp (Pi') (Sg')) (Unit')
 
 open Pi'
 open Sg'
-open One'
+open Unit'
 
 module L = struct
   include Lang.Op
